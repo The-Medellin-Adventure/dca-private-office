@@ -5,9 +5,39 @@ import { supabase } from "@/lib/supabase";
 
 // tabla = { id, columnas: string[], filas: string[][] }
 export default function DataTable({ tabla, onChanged }) {
+  const [nombre, setNombre] = useState(tabla.nombre || "Tabla");
   const [columnas, setColumnas] = useState(tabla.columnas || ["Columna 1"]);
   const [filas, setFilas] = useState(tabla.filas || []);
   const [saving, setSaving] = useState(false);
+
+  async function persistNombre(nextNombre) {
+    setSaving(true);
+    try {
+      const { error } = await supabase
+        .from("tablas")
+        .update({ nombre: nextNombre })
+        .eq("id", tabla.id);
+      if (error) throw error;
+      onChanged?.();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDeleteTabla() {
+    const ok = confirm(`¿Eliminar la tabla "${nombre}"? Esta acción no se puede deshacer.`);
+    if (!ok) return;
+
+    const { error } = await supabase.from("tablas").delete().eq("id", tabla.id);
+    if (error) {
+      console.error(error);
+      alert("No se pudo eliminar la tabla.");
+      return;
+    }
+    onChanged?.();
+  }
 
   async function persist(nextColumnas, nextFilas) {
     setSaving(true);
@@ -57,11 +87,28 @@ export default function DataTable({ tabla, onChanged }) {
     persist(columnas, next);
   }
 
+  function removeColumn(colIdx) {
+    if (columnas.length <= 1) {
+      alert("Debe quedar al menos una columna.");
+      return;
+    }
+    const nextColumnas = columnas.filter((_, i) => i !== colIdx);
+    const nextFilas = filas.map((f) => f.filter((_, i) => i !== colIdx));
+    setColumnas(nextColumnas);
+    setFilas(nextFilas);
+    persist(nextColumnas, nextFilas);
+  }
+
   return (
     <div className="card p-4 overflow-x-auto">
-      <div className="flex items-center justify-between mb-3">
-        <div className="font-serif text-xl text-ink">{tabla.nombre}</div>
-        <div className="flex gap-2">
+      <div className="flex items-center justify-between mb-3 gap-3">
+        <input
+          className="font-serif text-xl text-ink bg-transparent focus:outline-none flex-1 min-w-0"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          onBlur={() => persistNombre(nombre)}
+        />
+        <div className="flex gap-2 shrink-0">
           <button className="btn-secondary text-xs" onClick={addColumn}>+ Columna</button>
           <button className="btn-secondary text-xs" onClick={addRow}>+ Fila</button>
           <button
@@ -71,6 +118,13 @@ export default function DataTable({ tabla, onChanged }) {
           >
             {saving ? "Guardando..." : "Guardar"}
           </button>
+          <button
+            className="btn-secondary text-xs hover:border-terracotta hover:text-terracotta"
+            onClick={handleDeleteTabla}
+            title="Eliminar tabla"
+          >
+            🗑️
+          </button>
         </div>
       </div>
 
@@ -79,12 +133,21 @@ export default function DataTable({ tabla, onChanged }) {
           <tr>
             {columnas.map((col, colIdx) => (
               <th key={colIdx} className="text-left border-b border-line pb-2 pr-4">
-                <input
-                  className="bg-transparent font-medium text-ink w-full focus:outline-none"
-                  value={col}
-                  onChange={(e) => updateHeader(colIdx, e.target.value)}
-                  onBlur={() => persist(columnas, filas)}
-                />
+                <div className="flex items-center gap-1">
+                  <input
+                    className="bg-transparent font-medium text-ink w-full focus:outline-none"
+                    value={col}
+                    onChange={(e) => updateHeader(colIdx, e.target.value)}
+                    onBlur={() => persist(columnas, filas)}
+                  />
+                  <button
+                    className="text-inkSoft hover:text-terracotta text-xs shrink-0"
+                    onClick={() => removeColumn(colIdx)}
+                    title="Eliminar columna"
+                  >
+                    ×
+                  </button>
+                </div>
               </th>
             ))}
             <th className="w-8" />
