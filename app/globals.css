@@ -1,0 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  background-color: #F7F3EA;
+  color: #1F2A3C;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #D9C29A transparent;
+}
+
+.card {
+  @apply bg-paper border border-line rounded-xl2 shadow-card;
+}
+
+.btn-primary {
+  @apply inline-flex items-center gap-2 bg-ink text-cream px-4 py-2 rounded-lg text-sm font-medium hover:bg-gold transition-colors;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center gap-2 bg-transparent border border-line text-ink px-4 py-2 rounded-lg text-sm font-medium hover:border-gold hover:text-gold transition-colors;
+}
+
+.input {
+  @apply w-full border border-line rounded-lg px-3 py-2 text-sm bg-paper focus:outline-none focus:ring-2 focus:ring-goldSoft;
+}

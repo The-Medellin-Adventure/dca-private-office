@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Cualquier request debe venir autenticado (aunque sea de forma anónima,
+    // que la app hace sola sin mostrarte login). Esto bloquea el acceso
+    // directo de terceros a tu base de datos desde fuera de tu app.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
