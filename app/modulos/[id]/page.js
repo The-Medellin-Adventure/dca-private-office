@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import Sidebar from "@/components/Sidebar";
 import ItemCard from "@/components/ItemCard";
@@ -11,6 +11,7 @@ import PasswordGate, { isUnlocked } from "@/components/PasswordGate";
 
 export default function ModuloDetallePage() {
   const { id } = useParams();
+  const router = useRouter();
   const [modulo, setModulo] = useState(null);
   const [items, setItems] = useState([]);
   const [tablas, setTablas] = useState([]);
@@ -63,6 +64,21 @@ export default function ModuloDetallePage() {
     loadAll();
   }
 
+  async function handleDeleteModulo() {
+    const ok = confirm(
+      `¿Eliminar el módulo "${modulo.nombre}" junto con todos sus archivos y tablas? Esta acción no se puede deshacer.`
+    );
+    if (!ok) return;
+
+    const { error } = await supabase.from("modulos").delete().eq("id", id);
+    if (error) {
+      console.error(error);
+      alert("No se pudo eliminar el módulo.");
+      return;
+    }
+    router.push("/");
+  }
+
   if (!ready) {
     return (
       <div className="flex min-h-screen">
@@ -89,9 +105,25 @@ export default function ModuloDetallePage() {
     <div className="flex min-h-screen">
       <Sidebar ownerName="" ownerRole="" />
       <main className="flex-1 px-6 md:px-8 py-8">
-        <div className="flex items-center gap-3 mb-6">
-          <span className="text-3xl">{modulo.icono}</span>
-          <h1 className="font-serif text-3xl text-ink">{modulo.nombre}</h1>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">{modulo.icono}</span>
+            <h1 className="font-serif text-3xl text-ink">{modulo.nombre}</h1>
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="btn-secondary text-sm"
+              onClick={() => router.push(`/modulos/${id}/editar`)}
+            >
+              ✏️ Editar módulo
+            </button>
+            <button
+              className="btn-secondary text-sm hover:border-terracotta hover:text-terracotta"
+              onClick={handleDeleteModulo}
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
         </div>
 
         {modulo.protegido && !unlocked ? (
@@ -118,7 +150,7 @@ export default function ModuloDetallePage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {items.map((item) => (
-                    <ItemCard key={item.id} item={item} />
+                    <ItemCard key={item.id} item={item} onChanged={loadAll} />
                   ))}
                 </div>
               )}

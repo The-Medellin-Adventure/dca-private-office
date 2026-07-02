@@ -10,25 +10,26 @@ export default function ModulosPage() {
   const [modulos, setModulos] = useState([]);
   const [ready, setReady] = useState(false);
 
-  useEffect(() => {
-    async function load() {
-      const { data, error } = await supabase
-        .from("modulos")
-        .select("*, items(count)")
-        .order("orden", { ascending: true });
+  async function load() {
+    const { data, error } = await supabase
+      .from("modulos")
+      .select("*, items(count)")
+      .order("orden", { ascending: true });
 
-      if (!error) {
-        setModulos(
-          (data || []).map((m) => ({
-            ...m,
-            totalItems: m.items?.[0]?.count ?? 0,
-          }))
-        );
-      } else {
-        console.error(error);
-      }
-      setReady(true);
+    if (!error) {
+      setModulos(
+        (data || []).map((m) => ({
+          ...m,
+          totalItems: m.items?.[0]?.count ?? 0,
+        }))
+      );
+    } else {
+      console.error(error);
     }
+    setReady(true);
+  }
+
+  useEffect(() => {
     load();
   }, []);
 
@@ -51,7 +52,7 @@ export default function ModulosPage() {
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
           {modulos.map((m) => (
-            <ModuleCard key={m.id} modulo={m} />
+            <ModuleCard key={m.id} modulo={m} onChanged={load} />
           ))}
         </div>
       </main>
