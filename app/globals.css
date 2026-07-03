@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -12,6 +12,12 @@ html, body {
 * {
   scrollbar-width: thin;
   scrollbar-color: #D9C29A transparent;
+}
+
+/* Todos los títulos (font-serif) quedan en negrilla por defecto */
+.font-serif {
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .card {

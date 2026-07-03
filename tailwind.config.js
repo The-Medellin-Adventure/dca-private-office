@@ -17,7 +17,7 @@ module.exports = {
         terracotta: "#B5652E",
       },
       fontFamily: {
-        serif: ["'Cormorant Garamond'", "Georgia", "serif"],
+        serif: ["'Fraunces'", "Georgia", "serif"],
         sans: ["'Inter'", "system-ui", "sans-serif"],
       },
       boxShadow: {
